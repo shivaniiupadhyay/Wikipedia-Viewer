@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+	<script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
+	<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="index.css">
+	<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+	<title>Wikipedia Viewer</title>
+</head>
+  
+<body>
+<h2> Wikipedia Viewer </h2>
+<div id="root"></div>  
+<script type="text/babel">
+	const Article = (props) => (
+	<a href={props.url} target="_blank">
+    <h3>{props.title}</h3>
+    <p>
+      {props.children}
+    </p>
+	</a>
+);
+    class HelloWorld extends React.Component {
+  
+	
+		RandomPage () {
+		window.open('https://en.wikipedia.org/wiki/Special:Random', '_blank')
+		}
+		
+		constructor() {
+		super();
+
+		this.state = {
+		result: undefined,
+		input: ''
+		}
+		this.InputChange = this.InputChange.bind(this);
+		
+		}
+		InputChange(e) {
+		this.setState({input: e.target.value});
+		}
+		
+		submit(e) {
+		e.preventDefault();
+		let input=this.state.input.trim();
+		if(input.length==0){
+		window.alert("No Value entered")}
+		else{
+		$.ajax({
+            type: 'GET',
+            url: 'https://en.wikipedia.org/w/api.php?action=opensearch&format=json&search=' + input,
+            jsonpCallback: 'jsonCallback',
+            contentType: "application/json",
+            dataType: 'jsonp',
+            success: (result) => {
+               this.setState({ result: result });
+            },
+        });
+		}
+		this.setState({input: ''});
+		}
+		
+		
+		render() {
+		if(this.state.result !== undefined && this.state.result[1].length > 0) {
+			return (
+			<div>
+			<form onSubmit={this.submit.bind(this)}>
+			<input type="text" placeholder="Search Wiki!" value={this.state.input} onChange={this.InputChange}/>
+			</form>
+			&nbsp;
+			<div>
+			<button onClick={this.submit.bind(this)}> Search </button> 
+			&nbsp;
+			<button onClick={this.RandomPage}> Random </button>	
+				<div>
+				  {
+					this.state.result[1].map((entry, idx) => {
+					  return(
+						<Article title={entry} url={this.state.result[3][idx]} key={idx}>
+						  {this.state.result[2][idx]}
+						</Article>
+					  )
+					})
+				  }
+				</div>
+							
+			</div>
+			</div>
+			)
+		}
+		 else {
+      return (
+        <div>
+			<form onSubmit={this.submit.bind(this)}>
+			<input type="text" placeholder="Search Wiki!" value={this.state.input} onChange={this.InputChange}/>
+			</form>
+			&nbsp;
+			<div>
+			<button onClick={this.submit.bind(this)}> Search </button> 
+			&nbsp;
+			<button onClick={this.RandomPage}> Random </button>	
+			</div>
+			</div>
+      )
+    }
+	}
+	}
+
+ReactDOM.render(<HelloWorld />, document.getElementById('root'));
+</script>
+</body>
+  
+</html>
